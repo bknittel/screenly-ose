@@ -12,6 +12,7 @@ CONFIG_DIR = path.join(getenv('HOME'), '.screenly')
 DEFAULTS = {
     'main': {
         'database': '.screenly/screenly.db',
+        'nodetype': 'standalone',
         'listen': '0.0.0.0:8080',
     },
     'viewer': {
@@ -19,6 +20,8 @@ DEFAULTS = {
         'audio_output': 'hdmi',
         'shuffle_playlist': False,
         'resolution': '1920x1080',
+	# [bknittel] added new setting
+	'splash_time': 60,
     }
 }
 
@@ -79,10 +82,10 @@ class ScreenlySettings(IterableUserDict):
             for field, default in defaults.items():
                 self._get(config, section, field, default)
         try:
-            self.get_listen_ip()
-            int(self.get_listen_port())
+            ip = self.get_listen_ip()
+            port = int(self.get_listen_port())
         except ValueError as e:
-            logging.info("Could not parse setting 'listen': %s. Using default value: '%s'." % (unicode(e), DEFAULTS['main']['listen']))
+            logging.warning("Could not parse setting 'listen': %s" % unicode(e))
             self['listen'] = DEFAULTS['main']['listen']
 
     def save(self):

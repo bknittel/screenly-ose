@@ -21,6 +21,7 @@ import logging
 
 from db import connection
 from settings import settings
+from utils import tok_replace		# [bknittel] added
 import html_templates
 
 
@@ -88,7 +89,7 @@ def generate_asset_list():
     for asset in query:
         asset_id = asset[0]
         name = asset[1].encode('ascii', 'ignore')
-        uri = asset[2]
+        uri = tok_replace(asset[2])		# [bknittel] call tok_replace on uri
         md5 = asset[3]
         start_date = asset[4]
         end_date = asset[5]
@@ -141,8 +142,8 @@ def load_browser():
     logging.info('Browser loaded. Running as PID %d.' % browser.pid)
 
     if settings['show_splash']:
-        # Show splash screen for 60 seconds.
-        sleep(60)
+        # Show splash screen for specified number of seconds.
+        sleep(settings['splash_time'])	# [bknittel] use new setting
     else:
         # Give browser some time to start (we have seen multiple uzbl running without this)
         sleep(10)

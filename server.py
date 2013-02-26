@@ -33,6 +33,7 @@ from db import connection
 
 from utils import json_dump
 from utils import get_node_ip
+from utils import tok_replace   # [bknittel] added
 
 from settings import settings, DEFAULTS
 get_current_time = datetime.utcnow
@@ -272,13 +273,15 @@ def prepare_asset(request):
             raise Exception("Invalid combination. Can't select both URI and a file.")
 
         if uri and not uri.startswith('/'):
-            if not validate_uri(uri):
+	    actual_uri = tok_replace(uri)	# [bknittel] Use actual_uri in tests below
+
+            if not validate_uri(actual_uri):
                 raise Exception("Invalid URL. Failed to add asset.")
 
             if "image" in asset['mimetype']:
-                file = req_get(uri, allow_redirects=True)
+                file = req_get(actual_uri, allow_redirects=True)
             else:
-                file = req_head(uri, allow_redirects=True)
+                file = req_head(actual_uri, allow_redirects=True)
 
             if file.status_code == 200:
                 asset['uri'] = uri
@@ -325,7 +328,6 @@ def prepare_asset(request):
         return asset
     else:
         raise Exception("Not enough information provided. Please specify 'name', 'uri', and 'mimetype'.")
-
 
 @route('/api/assets', method="GET")
 def api_assets():
@@ -399,6 +401,8 @@ def settings_page():
             value = request.POST.get(field, default)
             if isinstance(default, bool):
                 value = value == 'on'
+	    elif isinstance(default, int):
+		value = int(value)
             settings[field] = value
         try:
             settings.save()

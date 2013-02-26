@@ -62,6 +62,11 @@
                   %a.btn.btn-primary.slide-button
 
             .control-group
+              %label.control-label Splash Screen Delay
+              .controls
+                  %input(type="text", name="splash_time", size=3, value={str(splash_time)}) &nbsp;seconds
+
+            .control-group
               %label.control-label Audio Out
               .controls
                 %select.span2(name="audio_output")
