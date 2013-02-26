@@ -20,6 +20,7 @@ DEFAULTS = {
         'audio_output': 'hdmi',
         'shuffle_playlist': False,
         'resolution': '1920x1080',
+        'default_duration': '10',
 	# [bknittel] added new setting
 	'splash_time': 60,
     }

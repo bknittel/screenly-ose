@@ -11,6 +11,9 @@
     %link(href="/static/css/toggle-switch.css", rel="stylesheet")
     %link(href="/static/css/screenly.css", rel="stylesheet")
 
+    :javascript
+      var default_duration = ${default_duration};
+
     %script(src="/static/js/jquery-1.9.1.min.js")
     / %script(src="/static/js/bootstrap-dropdown.js")
     %script(src="/static/js/underscore-1.4.3.min.js")
@@ -38,7 +41,7 @@
       %td
         %button.edit-asset-button.btn(type="button")
           %i.icon-pencil
-        %button.delete-asset-button.btn(type="button", dataTitle="Sure?", dataPlacement="left", dataHtml="true", dataTrigger="manual")
+        %button.delete-asset-button.btn(type="button", dataTitle="Are you sure?", dataPlacement="left", dataHtml="true", dataTrigger="manual")
           %i.icon-trash
       %td
         %label.activation-toggle.checkbox.toggle.well
@@ -51,9 +54,9 @@
     %script(type="text/template", id="confirm-delete-template")
       .clearfix
         .pull-left
-          %a.confirm-delete.btn.btn-large.btn-danger(href="#") Delete
+          %a.confirm-delete.btn.btn-medium.btn-danger(href="#") Delete
         .pull-right
-          %a.cancel-delete.btn.btn-large(href="#") Cancel
+          %a.cancel-delete.btn.btn-medium(href="#") Cancel
 
     %script(type="text/template", id="request-error-template")
       .container
@@ -92,7 +95,10 @@
                       .control-group
                         %label.control-label Upload Asset
                         .controls
-                          %input(type="file", name="file_upload")
+                          %div
+                            %button.btn Choose file
+                            %input(type="file", name="file_upload")
+                          #file_upload_label
             .asset-location.edit(style="display:none")
               %fieldset
                 .control-group
