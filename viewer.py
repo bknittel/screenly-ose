@@ -18,6 +18,7 @@ from stat import S_ISFIFO
 from subprocess import Popen, call
 from time import sleep, time
 import logging
+import traceback
 
 from db import connection
 from settings import settings
@@ -270,8 +271,7 @@ def reload_settings():
     last_setting_refresh = datetime.utcnow()
 
 
-if __name__ == "__main__":
-
+def main():
     # Before we start, reload the settings.
     reload_settings()
 
@@ -326,3 +326,10 @@ if __name__ == "__main__":
                 view_web(asset["uri"], asset["duration"])
             else:
                 print "Unknown MimeType, or MimeType missing"
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        logging.error(traceback.format_exc())
+        raise e
