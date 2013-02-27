@@ -315,7 +315,8 @@ if __name__ == "__main__":
             logging.info('Playlist is empty. Going to sleep.')
             sleep(5)
         else:
-            logging.info('Showing asset %s.' % asset["name"])
+	    # bknittel - changed to debug to minimize logging activity
+            logging.debug('Showing asset %s.' % asset["name"])
 
             watchdog()
 

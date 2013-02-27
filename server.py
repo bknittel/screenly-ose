@@ -24,13 +24,13 @@ import uuid
 import bottlesession		# [bknittel] added/authentication
 
 # Initiate logging
-import logging
-logging.basicConfig(level=logging.DEBUG,
-                    filename='/tmp/screenly_server.log',
-                    format='%(asctime)s %(message)s',
-                    datefmt='%a, %d %b %Y %H:%M:%S')
-
-logging.debug('Starting server.py')
+#import logging
+#logging.basicConfig(level=logging.DEBUG,
+#                    filename='/tmp/screenly_server.log',
+#                    format='%(asctime)s %(message)s',
+#                    datefmt='%a, %d %b %Y %H:%M:%S')
+#
+#logging.debug('Starting server.py')
 
 #from StringIO import StringIO
 #from PIL import Image
@@ -51,15 +51,15 @@ get_current_time = datetime.utcnow
 required_username = settings['username']
 required_password = settings['password']
 
-logging.debug ('Setting credentials ' + required_username + ':' + required_password)
+#logging.debug ('Setting credentials ' + required_username + ':' + required_password)
 
 # Initialize session manager
 if not required_username:
     session_manager = bottlesession.PreconfiguredSession({'valid':True, 'name': '', 'new': False})
-    logging.info('Not using authentication in web interface')
+    #logging.info('Not using authentication in web interface')
 else:
     session_manager = bottlesession.MemorySession()
-    logging.info('Using authentication in web interface')
+    #logging.info('Using authentication in web interface')
 
 valid_user = bottlesession.authenticator(session_manager)    
 
@@ -184,12 +184,12 @@ def login():
 
     if username == "":
 	# whether get or post
-	logging.debug('login() called, method=' + request.method + ', no username or password')
+	#logging.debug('login() called, method=' + request.method + ', no username or password')
         message = "Please specify username and password"
         return template('login', message=message)
 
-    logging.debug('login() called, method=POST, username=' + username + ', password=' + password)
-    logging.debug('expected password=' + required_password)
+    #logging.debug('login() called, method=POST, username=' + username + ', password=' + password)
+    #logging.debug('expected password=' + required_password)
 
     if session['new']:
 	message = "Cookies must be enabled to be able to authenticate."
@@ -198,22 +198,22 @@ def login():
     if password == required_password and username == required_username:
 	session['valid'] = True
 	session['name'] = username
-	logging.debug('password is valid')
+	#logging.debug('password is valid')
 
     if not session['valid']:
 	message = "Username or password is invalid"
 	return template('login', message=message)
 
-    logging.debug('Saving session')
+    #logging.debug('Saving session')
     session_manager.save(session)
 
-    logging.debug('Getting redir path')
+    #logging.debug('Getting redir path')
     redirpath = request.get_cookie('validuserloginredirect')
     if not redirpath:
 	redirpath = "/"
-	logging.debug('Did not find validuserloginredirect cookie')
+	#logging.debug('Did not find validuserloginredirect cookie')
 
-    logging.debug('Redirecting to ' + redirpath)
+    #logging.debug('Redirecting to ' + redirpath)
     redirect(redirpath)
 
 
