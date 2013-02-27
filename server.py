@@ -21,11 +21,21 @@ import json
 import os
 import traceback
 import uuid
+import bottlesession		# [bknittel] added/authentication
+
+# Initiate logging
+import logging
+logging.basicConfig(level=logging.DEBUG,
+                    filename='/tmp/screenly_server.log',
+                    format='%(asctime)s %(message)s',
+                    datefmt='%a, %d %b %Y %H:%M:%S')
+
+logging.debug('Starting server.py')
 
 #from StringIO import StringIO
 #from PIL import Image
 
-from bottle import route, run, request, error, static_file, response
+from bottle import route, run, request, error, static_file, response, redirect
 from bottle import HTTPResponse
 from bottlehaml import haml_template
 
@@ -33,10 +43,25 @@ from db import connection
 
 from utils import json_dump
 from utils import get_node_ip
-from utils import tok_replace   # [bknittel] added
+from utils import tok_replace   # [bknittel] added/token replacement
 
 from settings import settings, DEFAULTS
 get_current_time = datetime.utcnow
+
+required_username = settings['username']
+required_password = settings['password']
+
+logging.debug ('Setting credentials ' + required_username + ':' + required_password)
+
+# Initialize session manager
+if not required_username:
+    session_manager = bottlesession.PreconfiguredSession({'valid':True, 'name': '', 'new': False})
+    logging.info('Not using authentication in web interface')
+else:
+    session_manager = bottlesession.MemorySession()
+    logging.info('Using authentication in web interface')
+
+valid_user = bottlesession.authenticator(session_manager)    
 
 ################################
 # Utilities
@@ -113,6 +138,7 @@ def template(template_name, **context):
 
     # Add global contexts
     context['up_to_date'] = is_up_to_date()
+    context['required_username'] = required_username
 
     return haml_template(template_name, **context)
 
@@ -143,6 +169,64 @@ def initiate_db():
         return "Initiated database."
 
 
+@route('/auth/login', method='POST')
+@route('/auth/login', method='GET')
+def login():
+
+    session = session_manager.get_session()
+    session['valid'] = False
+
+    username = request.POST.get('username')
+    password = request.POST.get('password')
+
+    username = username.strip() if username else ""
+    password = password.strip() if password else ""
+
+    if username == "":
+	# whether get or post
+	logging.debug('login() called, method=' + request.method + ', no username or password')
+        message = "Please specify username and password"
+        return template('login', message=message)
+
+    logging.debug('login() called, method=POST, username=' + username + ', password=' + password)
+    logging.debug('expected password=' + required_password)
+
+    if session['new']:
+	message = "Cookies must be enabled to be able to authenticate."
+	return template('login', message=message)
+
+    if password == required_password and username == required_username:
+	session['valid'] = True
+	session['name'] = username
+	logging.debug('password is valid')
+
+    if not session['valid']:
+	message = "Username or password is invalid"
+	return template('login', message=message)
+
+    logging.debug('Saving session')
+    session_manager.save(session)
+
+    logging.debug('Getting redir path')
+    redirpath = request.get_cookie('validuserloginredirect')
+    if not redirpath:
+	redirpath = "/"
+	logging.debug('Did not find validuserloginredirect cookie')
+
+    logging.debug('Redirecting to ' + redirpath)
+    redirect(redirpath)
+
+
+@route('/auth/logout')
+@valid_user()
+def logout():
+    # actually, instead of marking session as invalid, we should just delete it
+    # unfortunately, the session manager does not allow us to do that (yet?)
+    session = session_manager.get_session()
+    session['valid'] = False
+    session_manager.save(session)
+    redirect('/auth/login')
+
 def is_active(asset, at_time=None):
     """Accepts an asset dictionary and determines if it
     is active at the given time. If no time is specified, 'now' is used.
@@ -162,7 +246,6 @@ def is_active(asset, at_time=None):
     at_time = at_time or get_current_time()
 
     return (asset['start_date'] < at_time and asset['end_date'] > at_time)
-
 
 def fetch_assets(keys=FIELDS, order_by="name"):
     """Fetches all assets from the database and returns their
@@ -387,12 +470,14 @@ def remove_asset(asset_id):
 ################################
 
 @route('/')
+@valid_user()
 def viewIndex():
     ctx = {'default_duration': settings['default_duration']}
     return template('index',**ctx)
 
 
 @route('/settings', method=["GET", "POST"])
+@valid_user()
 def settings_page():
 
     context = {'flash': None}
@@ -419,6 +504,7 @@ def settings_page():
 
 
 @route('/system_info')
+@valid_user()
 def system_info():
     viewer_log_file = '/tmp/screenly_viewer.log'
     if path.exists(viewer_log_file):

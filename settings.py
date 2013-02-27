@@ -14,6 +14,9 @@ DEFAULTS = {
         'database': '.screenly/screenly.db',
         'nodetype': 'standalone',
         'listen': '0.0.0.0:8080',
+	# [bknittel] axel's authentication code
+	'username': '',
+	'password': '',
     },
     'viewer': {
         'show_splash': True,

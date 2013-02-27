@@ -34,6 +34,12 @@
               %a(href="/system_info")
                 %i.icon-tasks.icon-white
                 System Info
+            - if required_username:          
+              %li.divider-vertical
+              %li
+                %a(href="/auth/logout")
+                  %i.icon-tasks.icon-white
+                  Logout
 
     .container
       .row

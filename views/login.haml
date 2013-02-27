@@ -1,0 +1,44 @@
+!!! 5
+%html
+
+  %head
+    %meta(charset="utf-8")
+    %title Screenly OSE
+
+    %link(href="/static/css/bootstrap.css", rel="stylesheet")
+    %link(href="/static/css/screenly.css", rel="stylesheet")
+
+  %body
+
+    .container
+      .row
+        .span12
+          %h1.page-header  
+            Login
+
+          - if message:
+               .span12.text-center
+              <strong>${message}</strong>
+
+        .span12
+          %form.form-horizontal(method="post")
+            .control-group
+              %label.control-label Username:
+              .controls
+                 %input(type="text", name="username", size=15)
+
+            .control-group
+              %label.control-label Password:
+              .controls
+                 %input(type="password", name="password", size=15)
+
+            .form-actions
+              %input.btn.btn-primary(type="submit", value="Login")
+
+      %hr
+
+      .row
+        .span12.text-center
+          Brought to you by <br />
+          %a(href="http://wireload.net")
+            %img(src="/static/img/WireLoad.png")
